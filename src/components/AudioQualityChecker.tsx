@@ -429,6 +429,47 @@ const AudioQualityChecker: React.FC = () => {
                   Quality Score: {metrics.qualityScore}/100
                 </Typography>
               </Box>
+              {processedAudioUrl && (
+                <Box sx={{ mt: 4, textAlign: 'center' }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => {
+                      const link = document.createElement('a');
+                      link.href = processedAudioUrl;
+                      link.download = `processed_${audioFile?.name || 'audio'}.wav`;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }}
+                    sx={{ 
+                      borderRadius: '12px',
+                      px: 4,
+                      py: 1.5,
+                      fontSize: '1.1rem',
+                      textTransform: 'none',
+                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 6px 8px rgba(0, 0, 0, 0.15)',
+                      },
+                      transition: 'all 0.2s ease-in-out',
+                    }}
+                  >
+                    Download Processed Audio
+                  </Button>
+                  <Typography 
+                    variant="body2" 
+                    color="text.secondary" 
+                    sx={{ mt: 1 }}
+                  >
+                    {filterSpeech && trimPauses ? 'Download audio with speech frequencies filtered and pauses trimmed' :
+                     filterSpeech ? 'Download audio with speech frequencies filtered' :
+                     trimPauses ? 'Download audio with pauses trimmed' :
+                     'Download processed audio'}
+                  </Typography>
+                </Box>
+              )}
             </Box>
           </Fade>
         )}
