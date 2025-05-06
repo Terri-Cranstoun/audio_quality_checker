@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Box, Button, Typography, Paper, CircularProgress } from '@mui/material';
+import { Box, Button, Typography, Paper, CircularProgress, Fade } from '@mui/material';
 import WaveSurfer from 'wavesurfer.js';
 
 interface AudioQualityMetrics {
@@ -82,71 +82,162 @@ const AudioQualityChecker: React.FC = () => {
   };
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', p: 3 }}>
-      <Paper elevation={3} sx={{ p: 3 }}>
-        <Typography variant="h4" gutterBottom>
-          Audio Quality Checker
-        </Typography>
+    <Paper 
+      elevation={6} 
+      sx={{ 
+        p: 4,
+        maxWidth: 800,
+        width: '100%',
+        borderRadius: '24px',
+        background: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(10px)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+      }}
+    >
+      <Typography 
+        variant="h4" 
+        gutterBottom 
+        sx={{ 
+          textAlign: 'center',
+          mb: 4,
+          fontWeight: 'bold',
+          color: '#2c5282',
+        }}
+      >
+        Audio Quality Checker
+      </Typography>
 
-        <Box sx={{ mb: 3 }}>
-          <Button
-            variant="contained"
-            component="label"
-            sx={{ mr: 2 }}
-          >
-            Upload Audio File
-            <input
-              type="file"
-              hidden
-              accept="audio/*"
-              onChange={handleFileUpload}
-            />
-          </Button>
-
-          {audioFile && (
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={analyzeAudioQuality}
-              disabled={isAnalyzing}
-            >
-              Analyze Quality
-            </Button>
-          )}
-        </Box>
+      <Box sx={{ mb: 4, textAlign: 'center' }}>
+        <Button
+          variant="contained"
+          component="label"
+          sx={{ 
+            mr: 2,
+            borderRadius: '12px',
+            px: 4,
+            py: 1.5,
+            fontSize: '1.1rem',
+            textTransform: 'none',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            '&:hover': {
+              transform: 'translateY(-2px)',
+              boxShadow: '0 6px 8px rgba(0, 0, 0, 0.15)',
+            },
+            transition: 'all 0.2s ease-in-out',
+          }}
+        >
+          Upload Audio File
+          <input
+            type="file"
+            hidden
+            accept="audio/*"
+            onChange={handleFileUpload}
+          />
+        </Button>
 
         {audioFile && (
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="subtitle1" gutterBottom>
-              Selected file: {audioFile.name}
-            </Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={analyzeAudioQuality}
+            disabled={isAnalyzing}
+            sx={{ 
+              borderRadius: '12px',
+              px: 4,
+              py: 1.5,
+              fontSize: '1.1rem',
+              textTransform: 'none',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: '0 6px 8px rgba(0, 0, 0, 0.15)',
+              },
+              transition: 'all 0.2s ease-in-out',
+            }}
+          >
+            Analyze Quality
+          </Button>
+        )}
+      </Box>
+
+      {audioFile && (
+        <Box sx={{ mb: 4 }}>
+          <Typography 
+            variant="subtitle1" 
+            gutterBottom 
+            sx={{ 
+              textAlign: 'center',
+              color: '#4a5568',
+              mb: 2,
+            }}
+          >
+            Selected file: {audioFile.name}
+          </Typography>
+          <Box 
+            sx={{ 
+              borderRadius: '12px',
+              overflow: 'hidden',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            }}
+          >
             <div ref={waveformRef} />
           </Box>
-        )}
+        </Box>
+      )}
 
-        {isAnalyzing && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      {isAnalyzing && (
+        <Fade in={true}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, mb: 4 }}>
             <CircularProgress size={24} />
-            <Typography>Analyzing audio quality...</Typography>
+            <Typography sx={{ color: '#4a5568' }}>Analyzing audio quality...</Typography>
           </Box>
-        )}
+        </Fade>
+      )}
 
-        {metrics && (
+      {metrics && (
+        <Fade in={true}>
           <Box>
-            <Typography variant="h6" gutterBottom>
+            <Typography 
+              variant="h6" 
+              gutterBottom 
+              sx={{ 
+                textAlign: 'center',
+                color: '#2c5282',
+                mb: 3,
+                fontWeight: 'bold',
+              }}
+            >
               Quality Analysis Results
             </Typography>
-            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+            <Box 
+              sx={{ 
+                display: 'grid', 
+                gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, 
+                gap: 3,
+                '& > *': {
+                  p: 2,
+                  borderRadius: '12px',
+                  background: 'rgba(74, 144, 226, 0.1)',
+                  transition: 'all 0.2s ease-in-out',
+                  '&:hover': {
+                    background: 'rgba(74, 144, 226, 0.15)',
+                    transform: 'translateY(-2px)',
+                  },
+                },
+              }}
+            >
               <Typography>Bitrate: {metrics.bitrate} kbps</Typography>
               <Typography>Sample Rate: {metrics.sampleRate} Hz</Typography>
               <Typography>Channels: {metrics.channels}</Typography>
               <Typography>Duration: {metrics.duration.toFixed(2)} seconds</Typography>
-              <Typography>Quality Score: {metrics.qualityScore.toFixed(1)}/100</Typography>
+              <Typography sx={{ gridColumn: { xs: '1', sm: '1 / -1' } }}>
+                Quality Score: {metrics.qualityScore.toFixed(1)}/100
+              </Typography>
             </Box>
           </Box>
-        )}
-      </Paper>
-    </Box>
+        </Fade>
+      )}
+    </Paper>
   );
 };
 
