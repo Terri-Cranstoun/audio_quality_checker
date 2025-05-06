@@ -72,6 +72,54 @@ const AudioQualityChecker: React.FC = () => {
     }
   };
 
+  const calculateQualityScore = (audioBuffer: AudioBuffer, bitrate: number): number => {
+    let score = 0;
+    const maxScore = 100;
+
+    // Frequency range score (250Hz - 4000Hz)
+    const minFreq = 250;
+    const maxFreq = 4000;
+    const sampleRate = audioBuffer.sampleRate;
+    
+    // Calculate frequency score (50 points)
+    if (sampleRate >= minFreq * 2 && sampleRate <= maxFreq * 2) {
+      // Perfect score if within range
+      score += 50;
+    } else if (sampleRate < minFreq * 2) {
+      // Linear decrease below minimum frequency
+      score += (sampleRate / (minFreq * 2)) * 50;
+    } else {
+      // Linear decrease above maximum frequency
+      score += ((maxFreq * 2) / sampleRate) * 50;
+    }
+
+    // Bitrate score (30 points)
+    const minBitrate = 128;
+    const maxBitrate = 320;
+    if (bitrate >= minBitrate && bitrate <= maxBitrate) {
+      // Perfect score if within range
+      score += 30;
+    } else if (bitrate < minBitrate) {
+      // Linear decrease below minimum bitrate
+      score += (bitrate / minBitrate) * 30;
+    } else {
+      // Linear decrease above maximum bitrate
+      score += (maxBitrate / bitrate) * 30;
+    }
+
+    // Channels score (20 points)
+    const channels = audioBuffer.numberOfChannels;
+    if (channels === 2) {
+      // Perfect score for stereo
+      score += 20;
+    } else if (channels === 1) {
+      // Half score for mono
+      score += 10;
+    }
+
+    return Math.min(maxScore, Math.round(score));
+  };
+
   const processAudio = async () => {
     if (!audioFile) return;
 
@@ -159,10 +207,13 @@ const AudioQualityChecker: React.FC = () => {
         wavesurferRef.current.load(processedUrl);
       }
 
+      // Calculate bitrate
+      const bitrate = Math.round((audioFile.size / processedBuffer.duration) * 8 / 1000);
+
       // Calculate quality metrics
-      const qualityScore = calculateQualityScore(processedBuffer);
+      const qualityScore = calculateQualityScore(processedBuffer, bitrate);
       setMetrics({
-        bitrate: Math.round((audioFile.size / processedBuffer.duration) * 8 / 1000),
+        bitrate,
         sampleRate: processedBuffer.sampleRate,
         channels: processedBuffer.numberOfChannels,
         duration: processedBuffer.duration,
@@ -217,13 +268,6 @@ const AudioQualityChecker: React.FC = () => {
     for (let i = 0; i < string.length; i++) {
       view.setUint8(offset + i, string.charCodeAt(i));
     }
-  };
-
-  const calculateQualityScore = (audioBuffer: AudioBuffer): number => {
-    const baseScore = 50;
-    const sampleRateScore = (audioBuffer.sampleRate / 44100) * 25;
-    const channelsScore = audioBuffer.numberOfChannels * 12.5;
-    return Math.min(100, baseScore + sampleRateScore + channelsScore);
   };
 
   const formatTime = (time: number) => {
@@ -382,7 +426,7 @@ const AudioQualityChecker: React.FC = () => {
                 <Typography>Channels: {metrics.channels}</Typography>
                 <Typography>Duration: {metrics.duration.toFixed(2)} seconds</Typography>
                 <Typography sx={{ gridColumn: { xs: '1', sm: '1 / -1' } }}>
-                  Quality Score: {metrics.qualityScore.toFixed(1)}/100
+                  Quality Score: {metrics.qualityScore}/100
                 </Typography>
               </Box>
             </Box>
