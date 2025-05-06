@@ -1,4 +1,4 @@
-import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
+import { CssBaseline, ThemeProvider, createTheme, Box } from '@mui/material';
 import AudioQualityChecker from './components/AudioQualityChecker';
 
 const theme = createTheme({
@@ -11,13 +11,27 @@ const theme = createTheme({
       main: '#2c5282',
     },
   },
+  shape: {
+    borderRadius: 16,
+  },
 });
 
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <AudioQualityChecker />
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+          p: 2,
+        }}
+      >
+        <AudioQualityChecker />
+      </Box>
     </ThemeProvider>
   );
 }
